@@ -1,10 +1,11 @@
 extern crate jsonwebtoken as jwt;
 
-use jwt::{encode, Header, EncodingKey};
+use jwt::{encode, EncodingKey, Header};
+use reqwest::header::{HeaderMap, HeaderValue, AUTHORIZATION, CONTENT_TYPE};
+use reqwest::Response;
+use serde::{Deserialize, Serialize};
 use std::fs;
 use std::time::{SystemTime, UNIX_EPOCH};
-use reqwest::header::{HeaderMap, HeaderValue, AUTHORIZATION, CONTENT_TYPE};
-use serde::{Serialize, Deserialize};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Claims {
@@ -43,7 +44,7 @@ pub async fn send_push_notification(
     device_token: &str,
     topic: &str,
     payload: ApnsPayload,
-) -> Result<(), reqwest::Error> {
+) -> Result<Response, reqwest::Error> {
     // Read the key from file
     let key = fs::read_to_string(auth_key_path).expect("Unable to read file");
 
@@ -59,16 +60,27 @@ pub async fn send_push_notification(
         ..Default::default()
     };
 
-    let token = encode(&header, &claims, &EncodingKey::from_ec_pem(key.as_bytes()).unwrap()).unwrap();
+    let token = encode(
+        &header,
+        &claims,
+        &EncodingKey::from_ec_pem(key.as_bytes()).unwrap(),
+    )
+    .unwrap();
 
     // Prepare the headers and body for the HTTP request
-    let url = format!("https://api.sandbox.push.apple.com/3/device/{}", device_token);
+    let url = format!(
+        "https://api.sandbox.push.apple.com/3/device/{}",
+        device_token
+    );
 
     let body = serde_json::to_string(&payload).expect("Failed to serialize payload");
 
     let mut headers = HeaderMap::new();
     headers.insert("apns-topic", HeaderValue::from_str(topic).unwrap());
-    headers.insert(AUTHORIZATION, HeaderValue::from_str(&format!("bearer {}", token)).unwrap());
+    headers.insert(
+        AUTHORIZATION,
+        HeaderValue::from_str(&format!("bearer {}", token)).unwrap(),
+    );
     headers.insert(CONTENT_TYPE, HeaderValue::from_static("application/json"));
 
     // Create an HTTP/2 client and send the request
@@ -79,15 +91,11 @@ pub async fn send_push_notification(
 
     //println!("Sending request to APNs...");
 
-    let response = client.post(&url)
-        .headers(headers)
-        .body(body)
-        .send()
-        .await?;
+    let response = client.post(&url).headers(headers).body(body).send().await?;
 
     // Print the response
     //println!("Status: {}", response.status());
     //println!("Headers: {:?}", response.headers());
 
-    Ok(())
+    Ok(response)
 }
