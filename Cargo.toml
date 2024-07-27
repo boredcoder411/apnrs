@@ -1,12 +1,21 @@
 [package]
-name = "apnrs"
+name = "push_notification"
 version = "0.1.0"
 edition = "2021"
+description = "A Rust library for sending push notifications via APNs."
+license = "MIT"  # or another license such as "Apache-2.0" or "GPL-3.0"
 
 [dependencies]
-reqwest = { version = "0.11", features = ["json"] }
-tokio = { version = "1", features = ["full"] }
+jsonwebtoken = "8.0"
+reqwest = { version = "0.11", features = ["json", "http2"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-openssl = "0.10"
-jsonwebtoken = "7.1"
+
+[lib]
+crate-type = ["lib"]
+
+[profile.dev]
+opt-level = 0
+
+[profile.release]
+opt-level = 3
