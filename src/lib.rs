@@ -77,7 +77,7 @@ pub async fn send_push_notification(
         .build()
         .expect("Failed to build client");
 
-    println!("Sending request to APNs...");
+    //println!("Sending request to APNs...");
 
     let response = client.post(&url)
         .headers(headers)
@@ -86,8 +86,8 @@ pub async fn send_push_notification(
         .await?;
 
     // Print the response
-    println!("Status: {}", response.status());
-    println!("Headers: {:?}", response.headers());
+    //println!("Status: {}", response.status());
+    //println!("Headers: {:?}", response.headers());
 
     Ok(())
 }
