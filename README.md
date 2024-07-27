@@ -2,18 +2,6 @@
 
 Other apns libraries in rust are annoyingly large, so I wrote this one
 
-## Installation
-
-Run this in your terminal:
-```bash
-cargo add apnrs
-```
-Or add this to your Cargo.toml:
-```toml
-[dependencies]
-apnrs = "0.2.0"
-```
-
 ## Usage
 
 ```rust
