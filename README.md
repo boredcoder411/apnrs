@@ -1,17 +1,17 @@
 # apnrs
 
-other apns libraries in rust are annoylingly slow
+Other apns libraries in rust are annoyingly large, so I wrote this one
 
 ## Installation
 
 Run this in your terminal:
 ```bash
-cargo add apnrs@=0.1.0
+cargo add apnrs
 ```
 Or add this to your Cargo.toml:
 ```toml
 [dependencies]
-apnrs = "=0.1.0"
+apnrs = "0.2.0"
 ```
 
 ## Usage
