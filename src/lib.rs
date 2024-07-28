@@ -44,6 +44,7 @@ pub async fn send_push_notification(
     device_token: &str,
     topic: &str,
     payload: ApnsPayload,
+    prod: bool
 ) -> Result<Response, reqwest::Error> {
     // Read the key from file
     let key = fs::read_to_string(auth_key_path).expect("Unable to read file");
@@ -68,10 +69,17 @@ pub async fn send_push_notification(
     .unwrap();
 
     // Prepare the headers and body for the HTTP request
-    let url = format!(
-        "https://api.sandbox.push.apple.com/3/device/{}",
-        device_token
-    );
+    let url = if prod {
+        format!(
+            "https://api.push.apple.com/3/device/{}",
+            device_token
+        )
+    } else {
+        format!(
+            "https://api.sandbox.push.apple.com/3/device/{}",
+            device_token
+        )
+    };
 
     let body = serde_json::to_string(&payload).expect("Failed to serialize payload");
 
@@ -89,13 +97,7 @@ pub async fn send_push_notification(
         .build()
         .expect("Failed to build client");
 
-    //println!("Sending request to APNs...");
-
     let response = client.post(&url).headers(headers).body(body).send().await?;
-
-    // Print the response
-    //println!("Status: {}", response.status());
-    //println!("Headers: {:?}", response.headers());
 
     Ok(response)
 }
