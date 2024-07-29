@@ -1,38 +1,42 @@
 # apnrs
 
-Other apns libraries in rust are annoyingly large, so I wrote this one
+`apnrs` is a Rust library for sending push notifications to Apple devices using the Apple Push Notification service (APNs).
+
+This crate provides utilities for creating the required payloads and sending the push notifications. 
 
 ## Usage
 
 ```rust
+extern crate apnrs;
 use apnrs::{send_push_notification, ApnsPayload, Aps};
 
 #[tokio::main]
 async fn main() {
-    // Example values
-    let auth_key_path = "path/to/AuthKey.p8";
-    let team_id = "your_team_id";
-    let key_id = "your_key_id";
-    let device_token = "device_token";
-    let topic = "your_topic";
-
-    let aps = Aps {
-        alert: "Hello, World!".to_string(),
-        content_available: 1,
-        badge: Some(1),
-        sound: Some("default".to_string()),
-        category: None,
-        thread_id: None,
-    };
-
     let payload = ApnsPayload {
-        aps,
+        aps: Aps {
+            alert: "Hello, world!".to_string(),
+            content_available: 1,
+            badge: Some(1),
+            sound: Some("default".to_string()),
+            category: None,
+            thread_id: None,
+        },
         custom_key: Some("custom_value".to_string()),
     };
 
-    match send_push_notification(auth_key_path, team_id, key_id, device_token, topic, payload).await {
-        Ok(_) => println!("Push notification sent successfully!"),
-        Err(e) => eprintln!("Failed to send push notification: {}", e),
+    let response = send_push_notification(
+        "path/to/auth/key",
+        "TEAM_ID",
+        "KEY_ID",
+        "DEVICE_TOKEN",
+        "com.example.app",
+        payload,
+        true
+    ).await;
+
+    match response {
+        Ok(res) => println!("Notification sent: {:?}", res),
+        Err(e) => eprintln!("Error sending notification: {:?}", e),
     }
 }
 ```
